@@ -19,7 +19,9 @@ class User implements JsonSerializable
     /** @var string */
     private $cityName;
     /** @var string */
-    public $phoneNumber;
+    private $phoneNumber;
+    /** @var int */
+    private $privileges;
 
     /**
      * @return int
@@ -132,6 +134,23 @@ class User implements JsonSerializable
     {
         $this->phoneNumber = $phoneNumber;
     }
+
+    /**
+     * @return int
+     */
+    public function getPrivileges(): int
+    {
+        return $this->privileges;
+    }
+
+    /**
+     * @param int $privileges
+     */
+    public function setPrivileges(int $privileges): void
+    {
+        $this->privileges = $privileges;
+    }
+
 
     public function jsonSerialize()
     {

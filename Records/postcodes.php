@@ -6,6 +6,7 @@ use JsonSerializable;
 
 class postcodes implements JsonSerializable
 {
+    // TODO: make a PostCode Model and remove GET/SET from this record
     /** @var int */
     private $id;
     /** @var int */

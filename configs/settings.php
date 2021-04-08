@@ -9,4 +9,5 @@ return [
         'db_username' => 'biograf_user',
         'db_password' => '7rbkG4t0Jwc21ZP8' // it's of no use, server is local ;)
     ],
+    'secret' => 'RnVnKsbDRR4qwSk1sRRJbTvWM93vV2KzkcLrAnIZgqq0l99dkbPD37TAx3j2Ptk'
 ];

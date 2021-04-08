@@ -2,6 +2,7 @@
 
 namespace Services;
 
+use http\Exception;
 use Models\Seat;
 use Records\seats;
 
@@ -19,43 +20,56 @@ class SeatService
     {
         $model = new Seat();
         $model->setId($array['id']);
-        $model->setLocation($array['location']);
+        $model->setX($array['x']);
+        $model->setY($array['y']);
         $model->setTheaterId($array['theaterId']);
-        $model->setTicketId($array['ticketId']);
-        $model->setIsBooked($array['isBooked']);
+        $model->setIsReserved($array['ticketId'] !== null);
 
         return $model;
     }
 
-    public function getSeats(): array
+    public function getSeats(string $theater): array
     {
-        return $this->query_service->selectRecords
+        $theaterId = null;
+        try {
+            $theaterId = intval($theater);
+        } catch (Exception $e) {
+            return [];
+        }
+        $records = $this->query_service->selectRecords
         (
             seats::class,
-            'SELECT id, location, theaterId, ticketId, isBooked FROM seats'
+            'SELECT id, x, y, theaterId, ticketId FROM seats WHERE theaterId = ?',
+            [$theaterId]
         );
+        $seats = [];
+        foreach ($records as $seat) {
+            $seats[] = $this->toModel((array)$seat);
+        }
+        return $seats;
     }
 
     public function putSeat(array $array): ?Seat
     {
         $seat = $this->toModel($array);
-        $seat->setIsBooked($seat->getTicketId() !== null);
+        $seat->setIsReserved($seat->getTicketId() !== null);
 
         /** @var seats $old_seat */
-        $old_seat = $this->query_service->selectRecord(seats::class, 'SELECT location, theaterId, ticketId FROM seats WHERE id = ?', [$seat->getId()]);
+        $old_seat = $this->query_service->selectRecord(seats::class, 'SELECT x, y, theaterId, ticketId FROM seats WHERE id = ?', [$seat->getId()]);
 
         if ($old_seat === null) {
             return null;
         }
         $seat->setId($old_seat->id);
-        $seat->setLocation($old_seat->location);
+        $seat->setX($old_seat->x);
+        $seat->setY($old_seat->y);
         $seat->setTheaterId($old_seat->threaterId);
 
         if ($this->query_service->updateRecord
         (
             Seat::class,
             'UPDATE seats SET ticketId = ?, isBooked = ? WHERE id = ?',
-            [$seat->getTicketId(), $seat->isBooked(), $seat->getId()]
+            [$seat->getTicketId(), $seat->isReserved(), $seat->getId()]
         )) {
             return $seat;
         }

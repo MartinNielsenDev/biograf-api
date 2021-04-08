@@ -9,13 +9,13 @@ class Seat implements JsonSerializable
     /** @var int */
     private $id;
     /** @var int */
-    private $location;
+    private $x;
+    /** @var int */
+    private $y;
     /** @var int */
     private $theaterId;
-    /** @var int|null */
-    private $ticketId;
     /** @var bool */
-    private $isBooked;
+    private $isReserved;
 
     /**
      * @return int
@@ -36,18 +36,35 @@ class Seat implements JsonSerializable
     /**
      * @return int
      */
-    public function getLocation(): int
+    public function getX(): int
     {
-        return $this->location;
+        return $this->x;
     }
 
     /**
-     * @param int $location
+     * @param int $x
      */
-    public function setLocation(int $location): void
+    public function setX(int $x): void
     {
-        $this->location = $location;
+        $this->x = $x;
     }
+
+    /**
+     * @return int
+     */
+    public function getY(): int
+    {
+        return $this->y;
+    }
+
+    /**
+     * @param int $y
+     */
+    public function setY(int $y): void
+    {
+        $this->y = $y;
+    }
+
 
     /**
      * @return int
@@ -84,17 +101,17 @@ class Seat implements JsonSerializable
     /**
      * @return bool
      */
-    public function isBooked(): bool
+    public function isReserved(): bool
     {
-        return $this->isBooked;
+        return $this->isReserved;
     }
 
     /**
-     * @param bool $isBooked
+     * @param bool $isReserved
      */
-    public function setIsBooked(bool $isBooked): void
+    public function setIsReserved(bool $isReserved): void
     {
-        $this->isBooked = $isBooked;
+        $this->isReserved = $isReserved;
     }
 
     public function jsonSerialize()

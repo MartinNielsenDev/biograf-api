@@ -1,8 +1,10 @@
 <?php
 
 use Psr\Container\ContainerInterface;
+use Services\AuthService;
 use Services\GenreService;
 use Services\QueryService;
+use Services\TicketService;
 use Services\UserService;
 use Slim\App;
 use Slim\Factory\AppFactory;
@@ -26,7 +28,13 @@ return [
     UserService::class => function (ContainerInterface $container) {
         return new UserService($container->get(QueryService::class));
     },
+    TicketService::class => function (ContainerInterface $container) {
+        return new TicketService($container->get(QueryService::class));
+    },
     GenreService::class => function (ContainerInterface $container) {
         return new GenreService($container->get(QueryService::class));
+    },
+    AuthService::class => function (ContainerInterface $container) {
+        return new AuthService($container->get(QueryService::class), $container->get('settings')['secret']);
     }
 ];

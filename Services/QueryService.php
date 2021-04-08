@@ -116,4 +116,19 @@ class QueryService
         }
         return false;
     }
+
+    public function beginTransaction()
+    {
+        $this->mysqli->begin_transaction();
+    }
+
+    public function commit()
+    {
+        $this->mysqli->commit();
+    }
+
+    public function rollback()
+    {
+        $this->mysqli->rollback();
+    }
 }

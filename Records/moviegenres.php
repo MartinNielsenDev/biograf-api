@@ -4,12 +4,12 @@ namespace Records;
 
 use JsonSerializable;
 
-class genres implements JsonSerializable
+class moviegenres implements JsonSerializable
 {
     /** @var int */
-    public $id;
-    /** @var string */
-    public $name;
+    public $genreId;
+    /** @var int */
+    public $movieId;
 
     public function jsonSerialize()
     {

@@ -2,6 +2,7 @@
 
 namespace Services;
 
+use Lib\CurrentUser;
 use Models\User;
 use Records\postcodes;
 
@@ -25,16 +26,21 @@ class UserService
         $model->setPostCode($array['postCode']);
         $model->setCityName($array['cityName'] ?? null);
         $model->setPhoneNumber($array['phoneNumber']);
+        $model->setPrivileges($array['privileges']);
 
         return $model;
     }
 
     public function createUser(array $array): ?User
     {
-        if (!isset($array['email']) || !isset($array['password']) || !isset($array['name']) || !isset($array['address']) || !isset($array['postCode']) || !isset($array['phoneNumber'])) {
+        if (!isset($array['email']) || !isset($array['password']) || !isset($array['name']) || !isset($array['address']) || !isset($array['postCode']) || !isset($array['phoneNumber']) || !isset($array['privileges'])) {
             return null;
         }
         $user = $this->toModel($array);
+
+        if (CurrentUser::$current_user->getPrivileges() <= $user->getPrivileges()) {
+            return null;
+        }
         $password_hash = password_hash($array['password'], PASSWORD_DEFAULT);
 
         /** @var postcodes|null $postCode */
@@ -45,8 +51,8 @@ class UserService
 
         /** @var User|null $user */
         $id = $this->query_service->insertRecord(
-            'INSERT INTO users(email, password, name, address, postCodeId, phoneNumber) VALUES (?, ?, ?, ?, ?, ?)',
-            [$user->getEmail(), $password_hash, $user->getName(), $user->getAddress(), $postCode->getId(), $user->getPhoneNumber()]
+            'INSERT INTO users(email, password, name, address, postCodeId, phoneNumber, privileges) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [$user->getEmail(), $password_hash, $user->getName(), $user->getAddress(), $postCode->getId(), $user->getPhoneNumber(), $user->getPrivileges()]
         );
         if ($id !== null) {
             $user->setId($id);
@@ -74,7 +80,7 @@ class UserService
         return $this->query_service->selectRecords
         (
             User::class,
-            'SELECT users.id, users.email, users.name, users.address, postcodes.postCode AS postCode, postcodes.cityName AS cityName, users.phoneNumber FROM users, postcodes WHERE users.postCodeId = postcodes.id'
+            'SELECT users.id, users.email, users.name, users.address, postcodes.postCode AS postCode, postcodes.cityName AS cityName, users.phoneNumber, users.privileges FROM users, postcodes WHERE users.postCodeId = postcodes.id'
         );
     }
 

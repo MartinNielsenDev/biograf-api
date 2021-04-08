@@ -13,17 +13,21 @@ class SeatController extends ControllerBase
     private $seat_service;
 
     public function __construct(
-        SeatService $genre_service
+        SeatService $seat_service
     )
     {
-        $this->seat_service = $genre_service;
+        $this->seat_service = $seat_service;
     }
 
     public function getSeats(Request $request, Response $response, array $params): ResponseInterface
     {
         $this->setResponse($response);
+        $params = $request->getQueryParams();
 
-        $seats = $this->seat_service->getSeats();
+        if (!isset($params['theater'])) {
+            return $this->badRequest();
+        }
+        $seats = $this->seat_service->getSeats($params['theater']);
         return $this->json($seats);
     }
 

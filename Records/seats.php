@@ -9,13 +9,13 @@ class seats implements JsonSerializable
     /** @var int */
     public $id;
     /** @var int */
-    public $location;
+    public $x;
+    /** @var int */
+    public $y;
     /** @var int */
     public $threaterId;
     /** @var int */
     public $ticketId;
-    /** @var bool */
-    public $isBooked;
 
     public function jsonSerialize()
     {

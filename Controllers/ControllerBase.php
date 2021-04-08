@@ -106,4 +106,11 @@ abstract class ControllerBase
     {
         return $this->response->withStatus(500);
     }
+
+    protected function notImplemented(): ResponseInterface
+    {
+        $this->response = $this->response->withStatus(501);
+
+        return $this->response;
+    }
 }
