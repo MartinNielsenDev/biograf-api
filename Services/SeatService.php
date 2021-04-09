@@ -2,7 +2,6 @@
 
 namespace Services;
 
-use http\Exception;
 use Models\Seat;
 use Records\seats;
 
@@ -23,24 +22,22 @@ class SeatService
         $model->setX($array['x']);
         $model->setY($array['y']);
         $model->setTheaterId($array['theaterId']);
-        $model->setIsReserved($array['ticketId'] !== null);
+        $model->setIsReserved($array['isReserved']);
 
         return $model;
     }
 
-    public function getSeats(string $theater): array
+    public function getSeats(string $show, string $theater): array
     {
         $theaterId = null;
-        try {
-            $theaterId = intval($theater);
-        } catch (Exception $e) {
-            return [];
-        }
+        $showId = intval($show);
+        $theaterId = intval($theater);
+
         $records = $this->query_service->selectRecords
         (
             seats::class,
-            'SELECT id, x, y, theaterId, ticketId FROM seats WHERE theaterId = ?',
-            [$theaterId]
+            'SELECT seats.id, seats.x, seats.y, seats.theaterId, EXISTS(SELECT * FROM ticketseats, shows, tickets WHERE ticketseats.seatId = seats.id && ticketseats.ticketId = tickets.id && tickets.showId = ?) AS isReserved FROM seats WHERE seats.theaterId = ?',
+            [$showId, $theaterId]
         );
         $seats = [];
         foreach ($records as $seat) {
@@ -51,28 +48,28 @@ class SeatService
 
     public function putSeat(array $array): ?Seat
     {
-        $seat = $this->toModel($array);
-        $seat->setIsReserved($seat->getTicketId() !== null);
-
-        /** @var seats $old_seat */
-        $old_seat = $this->query_service->selectRecord(seats::class, 'SELECT x, y, theaterId, ticketId FROM seats WHERE id = ?', [$seat->getId()]);
-
-        if ($old_seat === null) {
-            return null;
-        }
-        $seat->setId($old_seat->id);
-        $seat->setX($old_seat->x);
-        $seat->setY($old_seat->y);
-        $seat->setTheaterId($old_seat->threaterId);
-
-        if ($this->query_service->updateRecord
-        (
-            Seat::class,
-            'UPDATE seats SET ticketId = ?, isBooked = ? WHERE id = ?',
-            [$seat->getTicketId(), $seat->isReserved(), $seat->getId()]
-        )) {
-            return $seat;
-        }
-        return null;
+//        $seat = $this->toModel($array);
+//        $seat->setIsReserved($seat->getTicketId() !== null);
+//
+//        /** @var seats $old_seat */
+//        $old_seat = $this->query_service->selectRecord(seats::class, 'SELECT x, y, theaterId FROM seats WHERE id = ?', [$seat->getId()]);
+//
+//        if ($old_seat === null) {
+//            return null;
+//        }
+//        $seat->setId($old_seat->id);
+//        $seat->setX($old_seat->x);
+//        $seat->setY($old_seat->y);
+//        $seat->setTheaterId($old_seat->threaterId);
+//
+//        if ($this->query_service->updateRecord
+//        (
+//            Seat::class,
+//            'UPDATE seats SET ticketId = ?, isBooked = ? WHERE id = ?',
+//            [$seat->getTicketId(), $seat->isReserved(), $seat->getId()]
+//        )) {
+//            return $seat;
+//        }
+//        return null;
     }
 }

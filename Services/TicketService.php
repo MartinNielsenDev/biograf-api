@@ -3,10 +3,11 @@
 namespace Services;
 
 use Lib\CurrentUser;
-use Models\Seat;
+use Models\MovieShow;
+use Models\MovieTicket;
 use Models\Ticket;
+use Models\TicketSeat;
 use mysqli_sql_exception;
-use Records\seats;
 use Records\tickets;
 use Records\users;
 
@@ -61,12 +62,12 @@ class TicketService
                 $ticket->setId($ticket_id);
 
                 foreach ($ticket->getSeats() as $seat_id) {
-                    $updated = $this->query_service->updateRecord(
-                        seats::class,
-                        'UPDATE seats SET ticketId = ? WHERE seats.ticketId IS NULL && seats.id = ?',
+                    $inserted = $this->query_service->insertRecord(
+                        'INSERT INTO ticketseats(ticketid, seatid) VALUES (?, ?)',
                         [$ticket_id, $seat_id]
                     );
-                    if (!$updated) {
+
+                    if ($inserted === null) {
                         throw new mysqli_sql_exception();
                     }
                 }
@@ -103,23 +104,39 @@ class TicketService
         );
         $nTickets = [];
         foreach ($tickets as $ticket) {
-            $nTicket = new Ticket();
+            $nTicket = new MovieTicket();
             $nTicket->setId($ticket->id);
             $nTicket->setUserId($ticket->userId);
             $nTicket->setIsPaid($ticket->isPaid);
 
+            /** @var TicketSeat[] $ticketSeats */
             $ticketSeats = $this->query_service->selectRecords
             (
-                Seat::class,
-                'SELECT seats.id FROM seats, tickets WHERE seats.ticketId = tickets.id && tickets.id = ?',
+                TicketSeat::class,
+                'SELECT id, ticketId, seatId FROM ticketseats WHERE ticketseats.ticketId = ?',
                 [$nTicket->getId()]
             );
             $seats = [];
-            /** @var Seat $seat */
+
             foreach ($ticketSeats as $seat) {
                 $seats[] = $seat->getId();
             }
             $nTicket->setSeats($seats);
+
+            /** @var MovieShow $movieShow */
+            $movieShow = $this->query_service->selectRecord
+            (
+                MovieShow::class,
+                'SELECT shows.time, movies.title, movies.length, theaters.name AS theater FROM shows, movies, theaters WHERE shows.movieId = movies.id && shows.theaterId = theaters.id && shows.id = ?',
+                [$ticket->showId]
+            );
+
+            if ($movieShow === null) {
+                continue;
+            }
+
+            $nTicket->setShow($movieShow);
+
             $nTickets[] = $nTicket;
         }
         return $nTickets;

@@ -21,7 +21,7 @@ class MovieController extends ControllerBase
     public function postMovie(Request $request, Response $response)
     {
 //        $this->setResponse($response);
-
+//
 //        try {
 //            $array = $request->getParsedBody();
 //            $movie = $this->movie_service->createMovie($array);

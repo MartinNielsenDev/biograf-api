@@ -6,7 +6,6 @@ use Psr\Http\Message\ResponseInterface;
 use Services\SeatService;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
-use TypeError;
 
 class SeatController extends ControllerBase
 {
@@ -24,28 +23,28 @@ class SeatController extends ControllerBase
         $this->setResponse($response);
         $params = $request->getQueryParams();
 
-        if (!isset($params['theater'])) {
+        if (!isset($params['theater']) || !isset($params['show'])) {
             return $this->badRequest();
         }
-        $seats = $this->seat_service->getSeats($params['theater']);
+        $seats = $this->seat_service->getSeats($params['show'], $params['theater']);
         return $this->json($seats);
     }
 
     public function putSeat(Request $request, Response $response, array $params): ResponseInterface
     {
-        $this->setResponse($response);
-
-        try {
-            $array = $request->getParsedBody();
-            $seat = $this->seat_service->putSeat($array);
-
-            if ($seat === null) {
-                return $this->badRequest();
-            }
-        } catch (TypeError $e) {
-            return $this->badRequest();
-        }
-
-        return $this->json($seat);
+//        $this->setResponse($response);
+//
+//        try {
+//            $array = $request->getParsedBody();
+//            $seat = $this->seat_service->putSeat($array);
+//
+//            if ($seat === null) {
+//                return $this->badRequest();
+//            }
+//        } catch (TypeError $e) {
+//            return $this->badRequest();
+//        }
+//
+//        return $this->json($seat);
     }
 }
